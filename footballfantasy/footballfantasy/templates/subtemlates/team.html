@@ -1,0 +1,339 @@
+{% extends "../base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex flex-column">
+        <!-- choose league and countdown -->
+        <div class="row row-cols-auto justify-content-center align-items-center m-3" style="height: 150px;">
+            <div class="col-sm p-2">
+                <img src="{{ league_image.url }}" class="me-3" style="width: 30%;">
+                <a class="btn btn-outline-primary rounded" href="{% url 'createteam:chooseleague' hello='0' %}">تغییر لیگ</a>
+            </div>
+            <!-- <div class="mt-2 mt-lg-0 mt-md-0"></div> -->
+            <div class="col-sm col-lg-5 mb-5 mb-sm-2 mb-md mb-lg text-center text-truncate align-items-center rounded-3 h-sm-75 h-md-50 countdown-style img-fluid">
+                {% if task != "change" %}
+                <div class="row row-cols-auto justify-content-center align-items-center">
+                    <div class="col-sm col-md col-lg-5">
+                        <div class="row align-items-center">
+                            <div class="col col-md">
+                                <span class="ms-0" id="countdown-expire-text">مهلت ویرایش تیم :</span>
+                            </div>
+                            {% if page == "home" and num_of_changes > 0%}
+                            <div class="col col-md">
+                                <a class="btn btn-link" style="color: white;"
+                                    href="{% url 'createteam:createteam' task='change' league_id=league_id hash=hash %}">ویرایش تیم</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if num_of_changes > 0%}
+                    <div class="col-sm col-md-8 col-lg-5 col-lg">
+                        <div class="row">
+                            <div class="col-3 p-1" style="height: 60px;">
+                                <span id="countdown-seconds" class="mt-1"></span>
+                                <br>
+                                <span>ثانیه</span>
+                            </div>
+                            <div class="col-3 p-1" style="height: 60px;">
+                                <span id="countdown-minutes"></span>
+                                <br>
+                                <span>دقیقه</span>
+                            </div>
+                            <div class="col-3 p-1" style="height: 60px;">
+                                <span id="countdown-hours"></span>
+                                <br>
+                                <span>ساعت</span>
+                            </div>
+                            <div class="col-3 p-1" style="height: 60px;">
+                                <span id="countdown-days"></span>
+                                <br>
+                                <span>روز</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% elif num_of_changes == 0%}
+                    <div class="col-sm col-md-8 col-lg-5 col-lg">
+                        <div class="row">
+                            <div class="col-3 p-1" style="height: 60px;">
+                                <span id="xcountdown-seconds" class="mt-1">00</span>
+                                <br>
+                                <span>ثانیه</span>
+                            </div>
+                            <div class="col-3 p-1" style="height: 60px;">
+                                <span id="xcountdown-minutes">00</span>
+                                <br>
+                                <span>دقیقه</span>
+                            </div>
+                            <div class="col-3 p-1" style="height: 60px;">
+                                <span id="xcountdown-hours">00</span>
+                                <br>
+                                <span>ساعت</span>
+                            </div>
+                            <div class="col-3 p-1" style="height: 60px;">
+                                <span id="xcountdown-days">00</span>
+                                <br>
+                                <span>روز</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="pt-2 text-wrap" style="height: 65px;">
+                    <span>
+                        در این مرحله قادر به تعویض {{ num_of_changes }} بازیکن می‌باشید.
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <!-- my team, players, change players navs -->
+        <ul class="nav nav-tabs mt-3 mt-lg-1 mt-md-1" id="myTab" role="tablist">
+            {% if page == "createteam" %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="createteam-tab" data-bs-toggle="tab" data-bs-target="#create-team"
+                    type="button" role="tab" aria-controls="create-team" aria-selected="true">انتخاب تیم</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="roles-tab" data-bs-toggle="tab" data-bs-target="#roles"
+                    type="button" role="tab" aria-controls="roles" aria-selected="false">قوانین</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="tutorial-tab" data-bs-toggle="tab" data-bs-target="#tutorial"
+                    type="button" role="tab" aria-controls="tutorial" aria-selected="false">آموزش</button>
+            </li>
+            {% elif page == "home" %}
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="myteam-tab" data-bs-toggle="tab" data-bs-target="#myteam"
+                    type="button" role="tab" aria-controls="myteam" aria-selected="true">تیم من</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="playerlist-tab" data-bs-toggle="tab" data-bs-target="#playerlist"
+                    type="button" role="tab" aria-controls="playerlist" aria-selected="false">آمار بازیکنان</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="aboutleague-tab" data-bs-toggle="tab" data-bs-target="#aboutleague"
+                    type="button" role="tab" aria-controls="aboutleague" aria-selected="false">درباره لیگ</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="leagueawards-tab" data-bs-toggle="tab" data-bs-target="#leagueawards"
+                    type="button" role="tab" aria-controls="leagueawards" aria-selected="false">جوایز</button>
+            </li>
+            {% endif %}
+        </ul>
+        <div class="tab-content" id="myTabContent">
+            {% if page == "createteam" %}
+            <div class="tab-pane fade show active" id="create-team" role="tabpanel" aria-labelledby="createteam-tab">
+                {% include "./player_select_tab.html" with page="createteam" %}
+            </div>
+            <div class="tab-pane fade show" id="roles" role="tabpanel" aria-labelledby="roles-tab">
+                <!-- league describe -->
+                <div class="row justify-content-center p-4">
+                    <div class="shadow-lg col text-center rounded p-2">
+                        <div class="d-none d-md-block">
+                            <div class="row xcontainer">
+                                <img src="{% static 'home/images/aboutleague/aboutleague.jpg' %}" class="img-fluid" style="width:100%; height: 100%;">
+                                <div class="centered text-wrap" style="font-size: medium;">
+                                    <hr>
+                                    <p>قوانین انتخاب بازیکن‌ها:</p>
+                                    <span>
+                                        شما 100 میلیون بودجه برای خرید 15 بازیکن دارید (هر بازیکن قیمتش زیرش نوشته شده است).
+                                        <br>
+                                        شما باید بازیکنان رو طوری انتخاب کنید که ارزش تیم شما بیشتر از 100 میلیون نباشد.                                    
+                                        <hr>
+                                        <p>
+                                            <small>
+                                                تعداد بازیکنانی که میتوانید انتخاب کنید در هر پست به شرح زیر است:
+                                            </small>
+                                        </p>
+                                    </span>
+                                    <div class="">
+                                        <hr>
+                                        <p class="" style="font-size: smaller;">
+                                            دروازبان: 2 بازیکن
+                                        </p>
+                                        <hr>
+                                        <p class="" style="font-size: smaller;">
+                                            دفاع: 5 بازیکن
+                                        </p>
+                                        <hr>
+                                        <p class="" style="font-size: smaller;">
+                                            هافبک: 5 بازیکن
+                                        </p>
+                                        <hr>
+                                        <p class="" style="font-size: smaller;">
+                                            حمله: 3 بازیکن
+                                        </p>
+                                        <hr>
+                                    </div>
+                                </div>
+                            </div>    
+                        </div>
+                        <div class="d-xs-block d-sm-block d-md-none aboutleague" style="color: white;">
+                            <span>قوانین انتخاب بازیکن‌ها:</span>
+                            <br>
+                            <span>
+                                شما 100 میلیون بودجه برای خرید 15 بازیکن دارید (هر بازیکن قیمتش زیرش نوشته شده است).
+                                <br>
+                                شما باید بازیکنان رو طوری انتخاب کنید که ارزش تیم شما بیشتر از  100 میلیون نباشد.
+                                <br>
+                                <small>
+                                    تعداد بازیکنانی که میتوانید انتخاب کنید در هر پست به شرح زیر است:
+                                </small>
+                            </span>
+                            <div class="">
+                                <hr>
+                                <p class="" style="font-size: smaller;">
+                                    دروازبان: 2 بازیکن
+                                </p>
+                                <hr>
+                                <p class="" style="font-size: smaller;">
+                                    دفاع: 5 بازیکن
+                                </p>
+                                <hr>
+                                <p class="" style="font-size: smaller;">
+                                    هافبک: 5 بازیکن
+                                </p>
+                                <hr>
+                                <p class="" style="font-size: smaller;">
+                                    حمله: 3 بازیکن
+                                </p>
+                                <hr>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade show" id="tutorial" role="tabpanel" aria-labelledby="tutorial-tab">
+                <div class="row justify-content-center p-4">
+                    <div class="shadow-lg col bg-body rounded p-2">
+                        <video class="w-100 h-100"  controls>
+                            <source src="{% static '/createteam/images/tutorial.mp4' %}" type="video/mp4">
+                        </video>
+                    </div>
+                </div>
+            </div>
+            {% elif page == "home" %}
+            <div class="tab-pane fade show active" id="myteam" role="tabpanel" aria-labelledby="myteam-tab">
+                {% include "./player_select_tab.html" with page="home" %}
+            </div>
+            <div class="tab-pane fade show" id="playerlist" role="tabpanel" aria-labelledby="playerlist-tab">
+                <table class="table" style="font-size: medium;">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">نام</th>
+                            <th scope="col">تیم</th>
+                            <th scope="col">پست</th>
+                            <th scope="col">امتیاز</th>
+                        </tr>
+                    </thead>
+                    <tbody v-for="(post, key) in players_backup">
+                        <tr v-for="(player, index) in post">
+                            <th scope="row">#</th>
+                            <td>[[ player.player_name ]]</td>
+                            <td>[[ player.player_team ]]</td>
+                            <td>[[ player.player_post ]]</td>
+                            <td>[[ player.player_score ]]</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="tab-pane fade show" id="aboutleague" role="tabpanel" aria-labelledby="abouteleague-tab">
+                <!-- league describe -->
+                <div class="row justify-content-center p-4">
+                    <div class="shadow-lg col text-center rounded p-2">
+                        <div class="row xcontainer">
+                            <img src="{% static 'home/images/aboutleague/aboutleague.jpg' %}" class="img-fluid" style="width:100%;">
+                            <div class="centered text-wrap" style="font-size: medium;">{{ league_description }}</div>
+                            {% comment %}
+                            <div class="center-bottom" style="font-size: small;">
+                                <span>
+                                    {{ league_end_date }} 
+                                </span>
+                                <span>
+                                    تاریخ اتمام لیگ
+                                </span>
+                            </div>
+                            {% endcomment %}
+                        </div>
+                        <div class="row justify-content-center m-1">
+                            <div class="col border rounded">
+                                <p class="pt-2" style="font-size: smaller;">
+                                    مهلت زمان تغییر 15 بازیکن
+                                </p>
+                                <hr>
+                                <p style="font-size: smaller;">{{ league_start_ch_15 }} : <i class="bi bi-play-circle-fill" style="color: #DC3545;"></i></p>
+                                <p style="font-size: smaller;">{{ league_end_ch_15 }} : <i class="bi bi-stop-circle-fill" style="color: #DC3545;"></i></p>
+                            </div>
+                            <div class="col border rounded">
+                                <p class="pt-2" style="font-size: smaller;">
+                                    مهلت زمان تغییر 5 بازیکن
+                                </p>
+                                <hr>
+                                <p style="font-size: smaller;">{{ league_start_ch_5 }} : <i class="bi bi-play-circle-fill" style="color: #DC3545;"></i></p>
+                                <p style="font-size: smaller;">{{ league_end_ch_5 }} : <i class="bi bi-stop-circle-fill" style="color: #DC3545;"></i></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- when league going to ended -->
+                <!-- create team expired date -->
+                <!-- date for change 15 player -->
+                <!-- date for change 5 player -->
+            </div>
+            <div class="tab-pane fade show" id="leagueawards" role="tabpanel" aria-labelledby="leagueawards-tab">
+                <div class="row justify-content-center p-4">
+                    <div class="shadow-lg col bg-body rounded p-2">
+                        <img src="{{ league_reward_image.url }}" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% if task == 'create' %}
+<!-- Modal  playe tutorial -->
+<div class="modal fade" id="tutorial-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header justify-content-between">
+                <h5 class="modal-title" id="exampleModalLabel">
+                    <i class="bi bi-camera-video-fill ms-2 mt-3 icon-rotate"
+                        style="font-size: xx-large; color: #DC3545;"></i>
+                    آموزش ساخت تیم
+                </h5>
+                <button type="button" class="btn-close ms-0" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="shadow-lg rounded">
+                    <video class="w-100 h-100" controls autoplay>
+                        <source src="{% static '/createteam/images/tutorial.mp4' %}" type="video/mp4">
+                    </video>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بستن</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block js %}
+    {% if page == "createteam" %}
+        {% include "./player_select_tab.js.html" with tab=page task=task league_image=league_image message=message num_of_changes=num_of_changes change_expire_date=expire_date players_data=players_data user_selected_all_players=user_selected_all_players user_selected_main_players='{"player":[]}' %}
+    {% elif page == "home" %}
+        {% include "./player_select_tab.js.html" with tab=page team_format_date=team_format_date players_data=players_data league_image=league_image user_selected_all_players=user_selected_all_players user_selected_main_players=user_selected_main_players change_expire_date=expire_date %}
+    {% endif %}
+{% endblock %}
+
+{% block css %}
+    {% include "./player_select_tab.css.html" %}
+{% endblock %}

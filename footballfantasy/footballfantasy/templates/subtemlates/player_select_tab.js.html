@@ -1,0 +1,489 @@
+<script type="text/javascript">
+    {% if players_data %}
+    var p_d = {{ players_data | safe }}
+    var user_selected_all_players = {{ user_selected_all_players | safe }}
+    var url_league_id = {{ league_id | safe }}
+    var url_hash = "{{ hash | safe }}"
+    var user_selected_main_players = {{ user_selected_main_players | safe }}
+    var expire_date = "{{ change_expire_date | safe }}"
+    var _format_conter_date = "{{ team_format_date | safe }}"
+    var task = "{{ task }}"
+    {% endif %}
+    {% if message %}
+    var e_m = {{ message | safe }}
+    {% else %}
+    var e_m = ""
+    {% endif %}
+    var app = new Vue({
+        el: '#app',
+        props: ['player_data'],
+        data: {
+            is_anything_selected: false,
+            current_selected_post: 'goalkeeper',
+            search: null,
+            tab: "{{ tab }}" || "createteam",
+            format: null,
+            task: task,
+            error_message: e_m,
+            balance: 100.0,
+            players: p_d || {
+                goalkeeper: [],
+                defender: [],
+                forward: [],
+                attacker: [],
+            },
+            expire_date: expire_date,
+            players_backup: p_d || {
+                goalkeeper: [],
+                defender: [],
+                forward: [],
+                attacker: [],
+            },
+            user_players: user_selected_all_players || {
+                goalkeeper: [null, null],
+                defender: [null, null, null, null, null],
+                forward: [null, null, null, null, null],
+                attacker: [null, null, null]
+            },
+            user_main_players: user_selected_main_players || {
+            },
+            selected_players: {
+                goalkeeper: [null, null],
+                defender: [null, null, null, null, null],
+                forward: [null, null, null, null, null],
+                attacker: [null, null, null]
+            },
+            countDownDate: new Date("Jan 5, 2021 15:37:25").getTime()
+        },
+        // merge methods + input method 'how to merge two objects'
+        methods: {
+            player_selected: function (key, index) {
+                if (this.players[key] && index < this.players[key].length) {
+                    var sp = this.players[key][index]
+                    var selected = false
+                    for (var i = 0; i < this.selected_players[key].length; i++) {
+                        if (this.selected_players[key][i] == null) {
+                            var sp_is_selected = false
+                            for (var j = 0; j < this.selected_players[key].length; j++) {
+                                if (this.selected_players[key][j] != null && this.selected_players[key][j].id == sp.id) {
+                                    selected = true
+                                    sp_is_selected = true
+                                }
+                            }
+                            if (!sp_is_selected) {
+                                if (this.tab == "home"){
+                                    this.players[key][index].selected = true
+                                    this.selected_players[key][i] = sp
+                                    selected = true
+                                    this.$forceUpdate();
+                                    break
+                                }
+                                else {
+                                    if (this.balance - sp.player_value >= 0){
+                                        this.players[key][index].selected = true
+                                        this.selected_players[key][i] = sp
+                                        this.balance = (parseFloat(this.balance) - sp.player_value).toFixed(2)
+                                        selected = true
+                                        this.$forceUpdate();
+                                        break
+                                    } 
+                                    else {
+                                        break
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            if (this.selected_players[key][i].id == sp.id) {
+                                if (this.tab != "home" ){
+                                    this.balance = (parseFloat(this.balance) + sp.player_value).toFixed(2)
+                                }
+                                this.players[key][index].selected = false
+                                this.selected_players[key][i] = null
+                                selected = true
+                                this.$forceUpdate();
+                                break
+                            }
+                        }
+                    }
+                    if (!selected) {
+                        if (key == "goalkeeper") {
+                            alert("ظرفیت بازیکنان در پست دروازبان تکمیل است.")
+                        }
+                        if (key == "defender") {
+                            alert("ظرفیت بازیکنان در پست دفاع تکمیل است.")
+                        }
+                        if (key == "forward") {
+                            alert("ظرفیت بازیکنان در پست هافبک تکمیل است.")
+                        }
+                        if (key == "attacker") {
+                            alert("ظرفیت بازیکنان در پست حمله تکمیل است.")
+                        }
+                    }
+                }
+            },
+            go_right: function () {
+                var el = document.getElementById("boxified")
+                el.scrollLeft = Math.min(0, el.scrollLeft - 300)
+            },
+            go_left: function () {
+                var el = document.getElementById("boxified")
+                el.scrollLeft += 300
+            },
+            random_init: function () {
+                // first should clear all players in filed
+                this.clear_selected_player()
+
+                // random selected for user
+                for (var key in this.selected_players) {
+                    if (this.players[key].length < this.selected_players[key].length) {
+                        console.error('Tried to pick ${this.selected_players[key].length} out of ${this.players[key].length} players and thats not possible!')
+                        alert("به علت کمبود اعضا تیم امکان انتخاب شانسی برای این تیم وجود ندارد.")
+                        this.$forceUpdate()
+                        return
+                    }
+
+                    var indices = Array.from(Array(this.players[key].length).keys()).sort(() => (Math.random() > .5) ? 1 : -1)
+
+                    for (var index = 0; index < this.selected_players[key].length; index++) {
+                        this.selected_players[key][index] = this.players[key][indices[index]]
+                        this.selected_players[key][index].selected = true
+                        this.balance = (parseFloat(this.balance) - this.selected_players[key][index].player_value).toFixed(2)
+                    }
+                }
+                this.$forceUpdate()
+
+            },
+            playground_player_selected(key, player, index) {
+                if (this.selected_players[key][index] != null) {
+                    if (this.tab != "home"){
+                        this.balance = (parseFloat(this.balance) + player.player_value).toFixed(2)
+                    }
+                    this.selected_players[key][index].selected = false
+                    this.selected_players[key][index] = null
+                    this.$forceUpdate()
+                }
+            },
+            selected_post: function (key) {
+                this.current_selected_post = key
+            },
+            clear_selected_player: function () {
+                if (this.tab == "createteam") {
+                    for (var key in this.selected_players) {
+                        for (var j = 0; j < this.selected_players[key].length; j++) {
+                            if (this.selected_players[key][j] != null) {
+                                this.selected_players[key][j].selected = null
+                                this.selected_players[key][j] = null
+                            }
+                        }
+                    }
+                    this.is_anything_selected = false
+                } else if (this.tab == "home") {
+                    for (var key in this.selected_players) {
+                        for (var j = 0; j < this.selected_players[key].length; j++) {
+                            if (this.selected_players[key][j] != null) {
+                                this.selected_players[key][j].selected = null
+                                this.selected_players[key][j] = null
+                            }
+                        }
+                    }
+                    this.is_anything_selected = false
+                    for (var post in this.players) {
+                        for (var i = 0; i < this.players[post].length; i++) {
+                            for (var j = 0; j < this.user_main_players[post].length; j++) {
+                                if (this.user_main_players[post][j].id == this.players[post][i].id) {
+                                    this.player_selected(post, i);
+                                    break
+                                }
+                            }
+                        }
+                    }
+                    this.is_anything_selected = false
+                }
+                this.balance = 100
+                this.$forceUpdate()
+            },
+            get_select_btn_class: function (post) {
+                return {
+                    "btn-danger": this.current_selected_post == post,
+                    "btn-outline-danger": this.current_selected_post != post,
+                }
+            },
+            getCookie: function (name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            },
+            pass_selected_players: function () {
+                // check if all of players are selected
+                for (var key in this.selected_players) {
+                    for (var i = 0; i < this.selected_players[key].length; i++) {
+                        if (this.selected_players[key][i] == null) {
+                            if (this.tab == "createteam")
+                                alert("لطفا 15 بازیکن را انتخاب کنید.")
+                            else if (this.tab == "home") {
+                                alert("لطفا برای ذخیره ترکیب همه بازیکن‌ها را انتخاب کنین.")
+                            }
+                            return
+                        }
+                    }
+                }
+                // check if balance is more than zero else alert and return
+                if ( this.tab != "home" && parseFloat(this.balance) < 0){
+                    alert("کاربر گرامی حداکثر بودجه برای انتخاب بازیکن 100 میلیون تومان است و ارزش تیم شما بیشتر از این مقدار است. لطفا دوباره انتخاب کنید.")
+                    return
+                }
+
+
+                // get csrf token from cookie by getCookie func
+                const csrftoken = this.getCookie('csrftoken');
+                // create other header field named x-CSRFToken. its value is csrftoken
+                const headers = { "X-CSRFToken": csrftoken, "Content-Type": "application/json" }
+                // url
+                var _url = ""
+                if (this.tab == "createteam") {
+                    _url = '/createteam/' + this.task + '/' + url_league_id + '/' + url_hash
+                } else {
+                    _url = '/home/' + url_league_id
+                }
+
+                // sending selected player and leaque id to django by fetched csrf and header
+                axios({
+                    method: 'post',
+                    url: _url,
+                    headers: headers,
+                    data: this.selected_players,
+                }).then((res) => {
+                    if (this.tab == "createteam") {
+                        window.location = "{% url 'home:home' league_id %}"
+                    }
+                    else if(this.tab == "home"){
+                        alert("ترکیب با موفقیت ذخیره شد.")
+                    }
+                }).catch(function (error) {
+                    var e = error.response.data["message"]
+                    if(e!=""){
+                        alert(e)
+                        window.location.reload();
+                    }
+                    else {
+                        if (error.response) {
+                            // Request made and server responded
+                            console.log("1. ", error.response.status);
+                        } else if (error.request) {
+                            // The request was made but no response was received
+                            console.log("2. ", error.request)
+                        } else {
+                            // Something happened in setting up the request that triggered an Error
+                            console.log('3.', error.message);
+                        }
+                    }
+                });
+            },
+            home_select_player: function () {
+                for (var post in this.players) {
+                    for (var i = 0; i < this.players[post].length; i++) {
+                        for (var j = 0; j < this.user_main_players[post].length; j++) {
+                            if (this.user_main_players[post][j].id == this.players[post][i].id) {
+                                this.player_selected(post, i);
+                                break
+                            }
+                        }
+                    }
+                }
+            },
+            change_team_format: function (d, f, a) {
+                for (var key in this.selected_players) {
+                    for (var j = 0; j < this.selected_players[key].length; j++) {
+                        if (this.selected_players[key][j] != null) {
+                            this.selected_players[key][j].selected = null
+                            this.selected_players[key][j] = null
+                        }
+                    }
+                }
+                this.is_anything_selected = false
+                this.selected_players = {
+                    goalkeeper: [],
+                    defender: [],
+                    forward: [],
+                    attacker: []
+                }
+                this.user_main_players = {
+                    goalkeeper: [],
+                    defender: [],
+                    forward: [],
+                    attacker: []
+                }
+                var _format = {
+                    goalkeeper: 1,
+                    defender: d,
+                    forward: f,
+                    attacker: a,
+                }
+                this.format = a + "-" + f + "-" + d
+                for (var post in this.selected_players) {
+                    for (var i = 0; i < _format[post]; i++) {
+                        this.user_main_players[post].push(this.user_players[post][i])
+                        this.selected_players[post].push(null)
+                    }
+                }
+                this.home_select_player()
+            },
+        },
+        mounted() {
+            this.$nextTick(function () {
+                if (this.task == "create"){
+                    new bootstrap.Modal(document.getElementById('tutorial-modal'), {
+                        keyboard: true
+                    }).show()
+                }
+                if ( this.error_message != "" ){
+                    alert(this.error_message)
+                }
+                this.selected_post("goalkeeper")
+                if (this.tab == 'home') {
+                    this.players = this.user_players
+                    this.selected_players = {
+                        goalkeeper: [],
+                        defender: [],
+                        forward: [],
+                        attacker: []
+                    }
+                    for (var post in this.user_main_players) {
+                        for (var i = 0; i < this.user_main_players[post].length; i++) {
+                            this.selected_players[post].push(null)
+                        }
+                    }
+                    for (var post in this.players) {
+                        for (var i = 0; i < this.players[post].length; i++) {
+                            for (var j = 0; j < this.user_main_players[post].length; j++) {
+                                if (this.user_main_players[post][j].id == this.players[post][i].id) {
+                                    this.player_selected(post, i);
+                                }
+                            }
+                        }
+                    }
+                    this.format = this.user_main_players["attacker"].length + "-" + this.user_main_players["forward"].length + "-" + this.user_main_players["defender"].length
+                }
+                if (this.tab == 'createteam' && this.task == 'change'){
+                    for (var post in this.players) {
+                        for (var i = 0; i < this.players[post].length; i++) {
+                            for (var j = 0; j < this.user_players[post].length; j++) {
+                                if (this.user_players[post][j].id == this.players[post][i].id) {
+                                    this.player_selected(post, i);
+                                }
+                            }
+                        }
+                    }
+                }
+            })
+        },
+        computed: {
+            filteredList() {
+                if (this.search) {
+                    var p = null
+                    var players_list = []
+                    if (this.tab == 'createteam') {
+                        p = this.players[this.current_selected_post]
+                    }
+                    else {
+                        p = this.user_players[this.current_selected_post]
+                    }
+                    for (var i = 0; i < p.length; i++) {
+                        if (p[i].player_name.includes(this.search)) {
+                            players_list.push(p[i])
+                        }
+                    }
+                    return players_list
+                } else {
+                    if (this.tab == 'createteam') {
+                        return this.players[this.current_selected_post]
+                    }
+                    else {
+                        return this.user_players[this.current_selected_post]
+                    }
+                }
+
+
+            },
+        }
+    })
+
+    var countDownDate = new Date(expire_date).getTime();
+    // "Jan 5, 2022 15:37:25"
+    var countdownInterval = setInterval(function () {
+        // Get today's date and time
+        var now = new Date().getTime();
+
+        // Find the distance between now and the count down date
+        var distance = countDownDate - now;
+
+        // If the count down is over, write some text 
+        if (distance < 0) {
+            clearInterval(countdownInterval);
+            // document.getElementById("countdown-expire-text").innerHTML = "زمان تغییر تیم به پایان رسیده است";
+            document.getElementById("countdown-days").innerHTML = "00";
+            document.getElementById("countdown-hours").innerHTML = "00";
+            document.getElementById("countdown-minutes").innerHTML = "00";
+            document.getElementById("countdown-seconds").innerHTML = "00";
+            return
+        }
+        else {
+            // Time calculations for days, hours, minutes and seconds
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Output the result in an element with id="demo"
+            document.getElementById("countdown-days").innerHTML = days;
+            document.getElementById("countdown-hours").innerHTML = hours;
+            document.getElementById("countdown-minutes").innerHTML = minutes;
+            document.getElementById("countdown-seconds").innerHTML = seconds;
+            
+        }
+    }, 1000);
+
+    var format_conter_date = new Date(_format_conter_date).getTime();
+    // "Jan 5, 2022 15:37:25"
+    var format_conter = setInterval(function () {
+        // Get today's date and time
+        var now = new Date().getTime();
+
+        // Find the distance between now and the count down date
+        var distance = format_conter_date - now;
+        // If the count down is over, write some text 
+        if (distance < 0) {
+            clearInterval(format_conter);
+            // document.getElementById("countdown-expire-text").innerHTML = "زمان تغییر تیم به پایان رسیده است";
+            document.getElementById("countdown-hours").innerHTML = "00";
+            document.getElementById("countdown-minutes").innerHTML = "00";
+            document.getElementById("countdown-seconds").innerHTML = "00";
+            return
+        }
+        else {
+            // Time calculations for days, hours, minutes and seconds
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Output the result in an element with id="demo"
+            document.getElementById("format-timer-days").innerHTML = days+'d';
+            document.getElementById("format-timer-hours").innerHTML = hours+'h';
+            document.getElementById("format-timer-minutes").innerHTML = minutes+'m';
+            document.getElementById("format-timer-seconds").innerHTML = seconds+'s';
+            
+        }
+    }, 1000);
+</script>

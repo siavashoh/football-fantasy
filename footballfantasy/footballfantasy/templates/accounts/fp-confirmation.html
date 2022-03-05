@@ -1,0 +1,32 @@
+{% extends "./template.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center pt-sm-2 pt-md-4 pb-5">
+        <div class="shadow-lg col col-md-8 col-lg-5 bg-body rounded p-4 p-md-5">
+            <div class="text-center">
+                <i class="bi bi-check-lg text-info" style="font-size: 7rem;"></i> 
+                <h2>
+                    <p>ایمیل ارسال شد</p>
+                </h2>
+                <hr />
+                <p>{{user_name}}</p>
+                <p>ایمیل بازیابی رمز عبور با موفقیت ارسال شد.</p>
+                <p>لطفا برای تغییر رمز عبور به حساب ایمیل خود مراجعه کنید.</p>
+                <a href="{% url 'accounts:login' %}" class="btn btn-primary mb-3">انتقال به صفحه ورود</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    {% for message in messages %}
+        <h3> {{message}} </h3>
+    {% endfor %}
+</div>
+{% endblock %}
+
+
+{% block js %}
+<script type = "text/javascript">
+</script>
+{% endblock %}

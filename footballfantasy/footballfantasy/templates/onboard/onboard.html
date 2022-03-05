@@ -1,0 +1,268 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>فوتبال فانتزی</title>
+        <!-- Favicon-->
+        <link rel="shortcut icon" type="image/png" href="{% static 'base/images/favicon.png' %}"/>
+        <!-- Font Awesome icons (free version)-->
+        <script src="https://use.fontawesome.com/releases/v5.15.3/js/all.js" crossorigin="anonymous"></script>
+        <!-- Google fonts-->
+        <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
+        <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700" rel="stylesheet" type="text/css" />
+        <!-- Core theme CSS (includes Bootstrap)-->
+        <link href="{% static 'onboard/css/styles.css' %}" rel="stylesheet" />
+        <link href="{% static 'base/css/styles.css' %}" rel="stylesheet" />
+    </head>
+    <body class="body" id="page-top">
+        <!-- Navigation-->
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
+            <div class="container">
+                <a class="navbar-brand" href="#page-top"><img src="{% static 'logos/fflogo.png' %}" alt="..." /></a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+                    Menu
+                    <i class="fas fa-bars ms-1"></i>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarResponsive">
+                    <ul class="navbar-nav text-uppercase ms-auto py-4 py-lg-0">
+                        {% if user.is_authenticated %}
+                        <li class="nav-item"><span class="nav-link">{{ user.first_name }} {{ user.last_name }}</span></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'createteam:chooseleague' hello='0' %}">تیم من</a></li>
+                        {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:signup' %}">ثبت‌نام</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}">ورود</a></li>
+                        {% endif %}
+                        <li class="nav-item"><a class="nav-link" href="#services">شرایط</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#portfolio">جوایز</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#about">مراحل</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#contact">تماس با ما</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <!-- Masthead-->
+        <header class="masthead">
+            <div class="container">
+                <div class="masthead-subheading">به فوتبال فانتزی مجموعه بزرگ آرون خوش آمدید.</div>
+                <!-- <div class="masthead-heading text-uppercase">It's Nice To Meet You</div> -->
+                <a class="btn btn-primary btn-xl" href="{% url 'accounts:login' %}">آماده‌ای شروع کنی؟</a>
+            </div>
+        </header>
+        <!-- Services-->
+        <section class="page-section" id="services">
+            <div class="container">
+                <div class="row text-center">
+                    <div class="text-center">
+                        <h2 class="section-heading">شرایط شرکت در مسابقه</h2>
+                        <h3 class="section-subheading text-muted">برای شرکت در قرعه‌کشی ۱۰۰ میلیون تومانی مراحل زیر طی شود.</h3>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="fa-stack fa-4x">
+                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                            <i class="fas fa-futbol fa-stack-1x fa-inverse"></i>
+                        </span>
+                        <h4 class="my-3">فوتبال فانتزی</h4>
+                        <p class="text-muted">اول باید تو این سایت عضو شی و لیگ رو انتخاب کنی بعد تیم ۱۵ نفری خودت رو انتخاب کنی.</p>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="fa-stack fa-4x">
+                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                            <i class="fas fa-chart-line fa-stack-1x fa-inverse"></i>
+                        </span>
+                        <h4 class="my-3">آرون گروپس</h4>
+                        <p class="text-muted">دوم وارد مجموعه آرون شو و معامله کن و سود کن. <a href="https://arongroups.co/">آرون‌گروپس</a></p>
+                    </div>
+                    <div class="col-md-4">
+                        <span class="fa-stack fa-4x">
+                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                            <i class="fas fa-hand-holding-usd fa-stack-1x fa-inverse"></i>
+                        </span>
+                        <h4 class="my-3">قرعه‌کشی ۱۰۰ میلیونی</h4>
+                        <p class="text-muted">بعد از به اتمام رسیدن زمان مسابقات لیگ هر کی امتیازش بیشتر بود شانش بیشتری برای برنده شدن داره.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- awards Grid-->
+        <section class="page-section bg-light" id="portfolio">
+            <div class="container">
+                <div class="text-center">
+                    <h2 class="section-heading text-uppercase">جوایز</h2>
+                    <h3 class="section-subheading text-muted">جوایز مسابقات فوتبال فانتزی</h3>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-sm-6 mb-4">
+                        <!-- award item 1-->
+                        <div class="portfolio-item">
+                            <img class="img-fluid" src="{% static 'onboard/assets/img/portfolio/1.jpg' %}" />
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-sm-6 mb-4">
+                        <!-- Portfolio item 2-->
+                        <div class="portfolio-item">
+                            <img class="img-fluid" src="{% static 'onboard/assets/img/portfolio/2.jpg' %}" />
+                            <!-- <div class="portfolio-caption">
+                                <div class="portfolio-caption-heading">Explore</div>
+                                <div class="portfolio-caption-subheading text-muted">Graphic Design</div>
+                            </div> -->
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-sm-6 mb-4">
+                        <!-- Portfolio item 3-->
+                        <div class="portfolio-item">
+                            <img class="img-fluid" src="{% static 'onboard/assets/img/portfolio/3.jpg' %}" />
+                            <!-- <div class="portfolio-caption">
+                                <div class="portfolio-caption-heading">Finish</div>
+                                <div class="portfolio-caption-subheading text-muted">Identity</div>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- About-->
+        <section class="page-section" id="about">
+            <div class="container">
+                <div class="text-center">
+                    <h2 class="section-heading text-uppercase">مراحل ساخت تیم</h2>
+                    <h3 class="section-subheading text-muted">مراحل ثبت نام و ساخت تیم و شرکت در قرعه‌کشی</h3>
+                </div>
+                <ul class="timeline">
+                    <li>
+                        <div class="timeline-image">
+                            <!-- <img class="rounded-circle img-fluid" src="{% static 'onboard/assets/img/about/1.png' %}" alt="..." /> -->
+                            <!-- <span class="fa-stack fa-4x"> -->
+                                <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                <i class="fas fa-user-plus fa-stack-2x fa-inverse" style="font-size: 1.3rem;"></i>
+                            <!-- </span> -->
+                        </div>
+                        <div class="timeline-panel">
+                            <div class="timeline-heading">
+                                <h4>ثبت‌نام</h4>
+                                <h4 class="subheading"></h4>
+                            </div>
+                            <div class="timeline-body"><p class="text-muted">ابتدا در  سایت عضو شوید. مشخصات خود رو به ترتیب وارد کنید و دکمه ثبت‌نام را بزنید. بعد از ثبت‌نام ایمیلی به شما ارسال می‌شود که این ایمیل شامل لینک تایید حساب شما است. به ایمبل خود رفته و بر روی لینک ارسال شده کلیک کنید تا حساب شما فعال شود.<a href="{% url 'accounts:signup'%}" style="color: blue;">ثبت‌نام</a></p></div>
+                        </div>
+                    </li>
+                    <li class="timeline-inverted">
+                        <div class="timeline-image">
+                            <!-- <img class="rounded-circle img-fluid" src="{% static 'onboard/assets/img/about/3.jpg' %}" alt="..." /> -->
+                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                            <i class="fas fa-tasks fa-stack-2x fa-inverse" style="font-size: 1.3rem;"></i>
+                        </div>
+                        <div class="timeline-panel">
+                            <div class="timeline-heading">
+                                <h4>انتخاب لیگ</h4>
+                                <!-- <h4 class="subheading">Transition to Full Service</h4> -->
+                            </div>
+                            <div class="timeline-body">
+                                <p class="text-muted">بعد از ورود، شما باید یکی از لیگ ها را از بین لیگ های موجود انتخاب کنید. </p>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="timeline-image">
+                            <!-- <img class="rounded-circle img-fluid" src="{% static 'onboard/assets/img/about/4.jpg' %}" alt="..." /> -->
+                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                            <i class="fas fa-users fa-stack-2x fa-inverse" style="font-size: 1.3rem;"></i>
+                        </div>
+                        <div class="timeline-panel">
+                            <div class="timeline-heading">
+                                <h4>ساخت تیم</h4>
+                                <!-- <h4 class="subheading">Phase Two Expansion</h4> -->
+                            </div>
+                            <div class="timeline-body">
+                                <p class="text-muted">بعد از انتخاب لیگ شما باید تیم ۱۵ نفری خود را از بین بازیکنان تمام تیم هایی که در این لیگ حظور دارن انتخاب کنید.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="timeline-inverted">
+                        <div class="timeline-image">
+                            <!-- <img class="rounded-circle img-fluid" src="{% static 'onboard/assets/img/about/4.jpg' %}" alt="..." /> -->
+                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                            <i class="fas fa-user-edit fa-stack-2x fa-inverse" style="font-size: 1.3rem;"></i>
+                        </div>
+                        <div class="timeline-panel">
+                            <div class="timeline-heading">
+                                <h4>مهلت تغییر بازیکنان</h4>
+                                <!-- <h4 class="subheading">Phase Two Expansion</h4> -->
+                            </div>
+                            <div class="timeline-body">
+                                <p class="text-muted">بعد از انختاب تیم شما دو بار در تایم های مشخصی قادر به تغییر بازیکنان تیم خود هستید که یک بار ۱۵ بازیکن و یک بار هم ۵ بازیکن خود را میتوانید تغییر دهید.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="timeline-image">
+                            <!-- <img class="rounded-circle img-fluid" src="{% static 'onboard/assets/img/about/2.jpg' %}" alt="..." /> -->
+                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                            <i class="fas fa-trophy fa-stack-2x fa-inverse" style="font-size: 1.3rem;"></i>
+                        </div>
+                        <div class="timeline-panel">
+                            <div class="timeline-heading">
+                                <h4>امتیاز بازیکنان</h4>
+                                <!-- <h4 class="subheading">An Agency is Born</h4> -->
+                            </div>
+                            <div class="timeline-body">
+                                <p class="text-muted">بازیکنان بعد از هر مسابقه در لیگ امتیاز می‌گیرند و مجموع امتیاز بازیکنانی که انتخاب کرده‌اید امتیاز تیم شما خواهد بود. هر چه قدر امتیاز بیشتری داشته باشد شانس شما برای برده شدن جایزه ۱۰۰ میلیونی بیشتر است.</p>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="timeline-inverted">
+                        <div class="timeline-image">
+                            <h4>
+                                شما برنده
+                                <br />
+                                جایزه بزرگ
+                                <br />
+                                هستید.
+                            </h4>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+        <!-- contact us -->
+        <section class="page-section" id="contact">
+            <div class="container">
+                <div class="text-center">
+                    <h2 class="section-heading text-uppercase">تماس با ما</h2>
+                    <h3 class="section-subheading text-white">ایمیل پشتیبانی aronsupport@arongroups.co</h3>
+                </div>
+            </div>
+        </section>
+        <!-- Footer -->
+        <footer class="footer py-4">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-lg-4 text-lg-start">&copy; 2020 هلدینگ آرون گروپس</div>
+                    <div class="col-lg-4 my-3 my-lg-0">
+                        <a class="btn btn-dark btn-social mx-2" href="https://twitter.com/AronGroupsCo"><i class="fab fa-twitter"></i></a>
+                        <a class="btn btn-dark btn-social mx-2" href="https://www.facebook.com/arongroupsco"><i class="fab fa-facebook-f"></i></a>
+                        <a class="btn btn-dark btn-social mx-2" href="https://t.me/arongroupsbroker"><i class="fab fa-telegram-plane"></i></a>
+                        <a class="btn btn-dark btn-social mx-2" href="https://www.instagram.com/Arongroups/"><i class="fab fa-instagram"></i></a>
+                    </div>
+                    <div class="col-lg-4 text-lg-end">
+                        <a class="link-dark text-decoration-none me-3" href="#!">Privacy Policy</a>
+                        <a class="link-dark text-decoration-none" href="#!">Terms of Use</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+        <!-- Bootstrap core JS-->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Core theme JS-->
+        <script src="{% static 'onboard/js/scripts.js' %}"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js" integrity="sha512-RdSPYh1WA6BF0RhpisYJVYkOyTzK4HwofJ3Q7ivt/jkpW6Vc8AurL1R+4AUcvn9IwEKAPm/fk7qFZW3OuiUDeg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        <script>
+            window.addEventListener("load", function(){
+                bootbox.alert("Hello world!");
+            });
+        </script>
+    </body>
+</html>

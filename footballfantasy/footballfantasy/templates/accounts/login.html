@@ -1,0 +1,139 @@
+{% extends "./template.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center pt-sm-2 pt-md-4 pb-5">
+        <div class="shadow-lg col col-md-8 col-lg-5 bg-body rounded p-4 p-md-5">
+            <form name="login_form" action="login" method="POST" @submit.stop.prevent="submit" novalidate>
+                {% csrf_token %}
+                <div class="text-center">
+                    <i class="bi bi-person-circle text-info" style="font-size: 7rem;"></i>
+                    <p class="h1 mb-5">
+                        ورود
+                    </p>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">ایمیل</label>
+                    <input name="email" type="email" class="form-control" id="email"
+                        placeholder="ایمیل خود را وارد کنید." v-model="user.email" :class="validate_error('email')"
+                        required>
+                    <div class="invalid-feedback" v-show="errors.email && errors.email.length">
+                        <ol>
+                            <li v-for="text in errors.email">[[ text ]]</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="password1" class="form-label">رمز عبور</label>
+                    <input name="password1" type="password" class="form-control" id="password1"
+                        placeholder="رمز عبور خود را کنید." :class="validate_error('password1')"
+                        v-model="user.password1" required>
+                    <div class="invalid-feedback" v-show="errors.password1 && errors.password1.length">
+                        <ol>
+                            <li v-for="text in errors.password1">[[ text ]]</li>
+                        </ol>
+                    </div>
+                    <a class="link-secondary" href="{% url 'accounts:forgot_password' %}">رمز عبور خود را فراموشی
+                        کرده‌ام؟</a>
+                </div>
+                <div class="mb-3">
+                    <div class="g-recaptcha" data-sitekey="6LcvJxYcAAAAANUG3SKJDxRURpoXBtqMRcqJ6hfW"></div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block my-4">
+                    <i class="bi bi-person-check-fill"></i>
+                    ورود
+                </button>
+            </form>
+
+            {% for message in messages %}
+                <div class="alert alert-danger p-2" role="alert">
+                    <span>
+                        {{ message }}
+                    </span>
+                </div>
+            {% endfor %}
+
+            <hr />
+            <div class="clearfix">
+                <span class="float-start">
+                    <a href="{% url 'onboard:onboard' %}" class="float-left link-primary">صفحه اصلی</a>
+                </span>
+                <span class="float-end">
+                    <a class="link-primary" href="{% url 'accounts:signup' %}">ثبت نام</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block css %}
+{% endblock %}
+
+{% block js %}
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script type="text/javascript">
+    {% if response %}
+    var response = {{ response | safe }}
+    {% else %}
+    var response = { user_data: null, errors: null }
+    {% endif %}
+    app = new Vue({
+        el: "#app",
+        mounted() {
+            this.$nextTick(function () {
+                if (response.errors) {
+                    for (var error in response.errors) {
+                        if (response.errors[error] && response.errors[error].length)
+                            this.validated = true
+                    }
+                }
+            })
+        },
+        methods: {
+            validate_error: function (name) {
+                var has_error = this.errors[name] && this.errors[name].length
+                return {
+                    'is-invalid': this.validated && has_error,
+                    'is-valid': this.validated && !has_error
+                }
+            },
+            submit: function (e) {
+                this.errors.email = []
+                this.errors.password1 = []
+
+                if (!this.user.email) {
+                    this.errors.email.push("فیلد ایمیل خالی است.")
+                }
+                if (!/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/.test(this.user.email)) {
+                    this.errors.email.push("آدرس ایمیل معتبر نمی‌باشد.")
+                }
+                if (!this.user.password1) {
+                    this.errors.password1.push("فیلد رمز عبور خالی است!")
+                }
+                if (this.user.password1.length < 8) {
+                    this.errors.password1.push("رمز عبور باید حداقل 8 حرف یا عدد باشد.")
+                }
+                this.validated = true
+                for (var error in this.errors) {
+                    if (this.errors[error] && this.errors[error].length)
+                        return
+                }
+                e.target.submit();
+            }
+        },
+        data: {
+            validated: false,
+            user: response.user_data || {
+                email: "",
+                password1: "",
+            },
+            errors: response.errors || {
+                email: [],
+                password1: [],
+            }
+        }
+    });
+</script>
+{% endblock %}

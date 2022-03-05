@@ -1,0 +1,199 @@
+{% extends "./template.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center pt-sm-2 pt-md-4 pb-5">
+        <div class="shadow-lg col col-md-8 col-lg-5 bg-body rounded p-4 p-md-5">
+             <form name="signup_form" action="signup" method="post" @submit.stop.prevent="submit" novalidate>
+                <p class="h1 mb-3 text-center">
+                    <i class="bi bi-person-plus-fill text-info" style="font-size: 7rem;"></i>
+                </p>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">نام</label>
+                    <input name="first_name" type="text" class="form-control" id="first_name" placeholder="نام خود را وارد کنید." v-model="user.first_name" :class="validate_error('first_name')" required>
+                    <div class="invalid-feedback" v-show="errors.first_name && errors.first_name.length">
+                        <ol><li v-for="text in errors.first_name">[[ text ]]</li></ol>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">نام خانوادگی</label>
+                    <input name="last_name" type="text" class="form-control" id="last_name" placeholder="نام خانوادگی خود را وارد کنید." v-model="user.last_name" :class="validate_error('last_name')" required>
+                    <div class="invalid-feedback" v-show="errors.last_name && errors.last_name.length">
+                        <ol><li v-for="text in errors.last_name">[[ text ]]</li></ol>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">ایمیل</label>
+                    <input name="email" type="email" class="form-control" id="email" placeholder="example@abc.com"  v-model="user.email" :class="validate_error('email')" required>
+                    <div class="invalid-feedback" v-show="errors.email && errors.email.length">
+                        <ol>
+                            <li v-for="text in errors.email">[[ text ]]</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="phone_number" class="form-label">شماره موبایل</label>
+                    <input name="phone_number" type="text" class="form-control" id="phone_number" placeholder="۰۹۱۲۱۲۳۴۵۶۷" :class="validate_error('phone_number')" v-model="user.phone_number" required>
+                    <div class="invalid-feedback" v-show="errors.phone_number && errors.phone_number.length">
+                        <ol>
+                            <li v-for="text in errors.phone_number">[[ text ]]</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="password1" class="form-label">رمز عبور</label>
+                    <input name="password1" type="password" class="form-control" id="password1" placeholder="رمز عبور خود را با حداقل ۸ کارکتر وارد کنید." :class="validate_error('password1')" v-model="user.password1" required>
+                    <div class="invalid-feedback" v-show="errors.password1 && errors.password1.length">
+                        <ol>
+                            <li v-for="text in errors.password1">[[ text ]]</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="password2" class="form-label">تکرار رمز عبور</label>
+                    <input name="password2" type="password" class="form-control" id="password2" placeholder="رمز عبور خود را دوباره وارد کنید." :class="validate_error('password2')" v-model="user.password2" required>
+                    <div class="invalid-feedback" v-show="errors.password2 && errors.password2.length">
+                        <ol>
+                            <li v-for="text in errors.password2">[[ text ]]</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="g-recaptcha" data-sitekey="6LcvJxYcAAAAANUG3SKJDxRURpoXBtqMRcqJ6hfW"></div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block my-4">
+                    <i class="bi bi-person-plus-fill"></i>
+                    ثبت نام
+                </button>
+
+                {% for message in messages %}
+                <div class="alert alert-danger p-2" role="alert">
+                    <span>
+                        {{ message }}
+                    </span>
+                </div>
+                {% endfor %}
+
+            </form>
+             <hr />
+             <div class="clearfix">
+                 <span class="float-start">
+                     <a href="{% url 'onboard:onboard' %}" class="float-left">صفحه اصلی</a>
+                 </span>
+                 <span class="float-end">
+                    <a href="{% url 'accounts:login' %}" >ورود</a>
+                 </span>
+             </div>
+         </div>
+    </div>
+</div>
+
+{% endblock %}
+
+
+{% block js %}
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script type = "text/javascript">
+    {% if response %}
+    var response = {{ response | safe }}
+    {% else %}
+    var response = { user_data: null, errors: null }
+    {% endif %}
+    app = new Vue({
+        el: "#app",
+        mounted() {
+            this.$nextTick(function () {
+                if(response.errors) {
+                    for(var error in response.errors) {
+                        if(response.errors[error] && response.errors[error].length)
+                            this.validated = true
+                    }
+                }
+            })
+        },
+        methods: {
+            validate_error: function(name) {
+                var has_error = this.errors[name] && this.errors[name].length
+                return {
+                    'is-invalid' : this.validated && has_error,
+                    'is-valid' : this.validated && !has_error
+                }
+            },
+            submit: function(e) {
+                this.errors.first_name = []
+                this.errors.last_name = []
+                this.errors.email = []
+                this.errors.phone_number = []
+                this.errors.password1 = []
+                this.errors.password2 = []
+
+                if(!this.user.first_name) {
+                    this.errors.first_name.push("فیلد نام نمی‌تواند خالی باشد.")
+                }
+                if (this.user.first_name.length < 3 ) {
+                    this.errors.first_name.push("نام باید بیشتر از 3 کاراکتر باشد.")
+                }
+
+                if(!this.user.last_name) {
+                    this.errors.last_name.push("فیلد نام خانوادگی خالی است!")
+                }
+                if (this.user.last_name.length < 3) {
+                    this.errors.last_name.push("نام خانوادگی باید بیشتر از 3 کاراکتر باشد")
+                }
+
+                if(!this.user.email) {
+                    this.errors.email.push("فیلد ایمیل خالی است.")
+                }
+                if(!/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/.test(this.user.email)) {
+                    this.errors.email.push("آدرس ایمیل معتبر نمی‌باشد.")
+                }
+
+                if(!this.user.phone_number) {
+                    this.errors.phone_number.push("فیلد شماره موبایل خالی است!")
+                }
+
+                if(!/(\+?98|0)9\d{7}/.test(this.user.phone_number)) {
+                    this.errors.phone_number.push("شماره موبایل معتبر نمی‌باشد، باید به صورت ۰۹۱۲۱۲۳۴۵۶۷ وارد کنید.")
+                }
+
+                if(!this.user.password1) {
+                    this.errors.password1.push("فیلد رمز عبور خالی است!")
+                }
+                if (this.user.password1.length < 8) {
+                    this.errors.password1.push("رمز عبور باید حداقل 8 حرف یا عدد باشد.")
+                }
+
+                if (this.user.password2 != this.user.password1) {
+                    this.errors.password2.push("تکرار رمز با خود رمز عبور برابر نیست.")
+                }
+                this.validated = true
+                for(var error in this.errors) {
+                    if(this.errors[error] && this.errors[error].length)
+                        return
+                }
+                e.target.submit();
+            }
+        },
+        data: {
+            validated: false,
+            user: response.user_data || {
+                first_name : "",
+                last_name : "",
+                email : "",
+                phone_number: "",
+                password1 : "",
+                password2 : "",
+            },
+            errors: response.errors || {
+                first_name: [],
+                last_name: [],
+                email: [],
+                phone_number: [],
+                password1: [],
+                password2: [],
+            }
+        }
+    });
+</script>
+{% endblock %}

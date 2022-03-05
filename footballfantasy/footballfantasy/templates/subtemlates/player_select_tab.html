@@ -1,0 +1,457 @@
+{% load static %}
+
+<div id="app">
+    {% block top %}
+    {% endblock %}
+
+    {% block select_player %}
+    <div class="row">
+        <!-- players post selected  -->
+        <div class="btn-group col col-md col-lg m-1 ms-md-3 ms-lg-4" role="group" aria-label="Basic outlined example">
+            <button type="button" class="btn rounded m-1 ms-0 text-truncate" :class="get_select_btn_class('goalkeeper')"
+                @click="selected_post('goalkeeper')">دروازبان</button>
+            <button type="button" class="btn rounded m-1 ms-0" :class="get_select_btn_class('defender')"
+                @click="selected_post('defender')">دفاع</button>
+            <button type="button" class="btn rounded m-1 ms-0" :class="get_select_btn_class('forward')"
+                @click="selected_post('forward')">هافبک</button>
+            <button type="button" class="btn rounded m-1 ms-0" :class="get_select_btn_class('attacker')"
+                @click="selected_post('attacker')">حمله</button>
+        </div>
+        <!-- search player in post box  -->
+        <div class="input-group align-items-center col-6 col-md col-lg ps-2">
+            <i class="bi bi-search" style="font-size: 20px"></i>
+            <input type="search" class="form-control rounded m-1" v-model="search" placeholder="جستجو بازیکن"
+                aria-label="Search" aria-describedby="search-addon" />
+        </div>
+    </div>
+    <!-- show all players with seleted post -->
+    <div class="row align-items-center text-center align-middle w-100 position-relative m-0 mb-1"
+        :set="flist = filteredList">
+        <div v-if="flist.length > 3" class="position-absolute swiper-btn swiper-right-btn " @click.prevent="go_left">
+            <small class="bi bi-arrow-right" aria-hidden="true" style="font-size: 20px ; color:#DC3545;"></small>
+        </div>
+        <div class="col-12 m-0 p-0 bg-light align-items-center rounded" style="min-height: 100px;">
+            <div class="row box-container align-top m-0" id="boxified">
+                <div v-if="flist.length != 0" class="col-3 col-sm-2 col-md-3 col-lg-2 players-div"
+                    v-for="(player, index) in flist" :class="{'disabled':player.selected}"
+                    @click="player_selected([current_selected_post], index)">
+                    <div class="d-flex flex-column">
+                        <div class="d-block text-center align-middle p-0 p-md-3 xcontainer">
+                            <img src="{% static 'home/images/shirts/player_shirt.png' %}"
+                                class="p-2 w-100 h-100 w-md-75 h-md-75">
+                            {% if page == "home" %}
+                            <div class="d-none d-lg-block center-bottom text-truncate"
+                                style="font-size: 0.9vw; color: #4B799A;">
+                                امتیاز [[ player.player_score ]]
+                            </div>
+                            <div class="d-xs-block d-sm-block d-md-block d-lg-none center-bottom text-truncate"
+                                style="font-size: 2.2vw; color: #4B799A;">
+                                امتیاز [[ player.player_score ]]
+                            </div>
+                            {% else %}
+                            <div class="d-none d-lg-block center-bottom text-truncate"
+                                style="font-size: 0.9vw; color: #4B799A;">
+                                [[ player.player_value ]] میلیون
+                            </div>
+                            <div class="d-xs-block d-sm-block d-md-block d-lg-none center-bottom text-truncate"
+                                style="font-size: 2.2vw; color: #4B799A;">
+                                [[ player.player_value ]] میلیون
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-md-3">
+                            <div class="d-none d-lg-block text-truncate flex-shrink-0 flex-nowrap w-100"
+                                style="font-size: 0.9vw;">
+                                [[ player.player_name ]]
+                            </div>
+                            <div class="d-xs-block d-sm-block d-md-block d-lg-none text-truncate flex-shrink-0 flex-nowrap w-100"
+                                style="font-size: 2.1vw;">
+                                [[ player.player_name ]]
+                            </div>
+                            <div class="d-none d-lg-block text-truncate flex-shrink-0 flex-nowrap w-100 text-muted"
+                                style="font-size: 0.8vw;">
+                                [[ player.player_team ]]
+                            </div>
+                            <div class="d-xs-block d-sm-block d-md-block d-lg-none text-truncate flex-shrink-0 flex-nowrap w-100 text-muted"
+                                style="font-size: 1.8vw;">
+                                [[ player.player_team ]]
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="flist.length == 0" class="text-muted m-5">
+                <div>
+                    بازیکنی با مشخصات موردنظر شما یافت نشد!
+                </div>
+            </div>
+        </div>
+        <div v-if="flist.length > 3" class="position-absolute swiper-btn swiper-left-btn" @click.prevent="go_right">
+            <i class="bi bi-arrow-left" aria-hidden="true" style="font-size: 20px; color: #DC3545;"></i>
+        </div>
+    </div>
+    {% endblock %}
+
+    <!-- block between player select and playground -->
+    {% block middle %}
+    
+    {% if page == "createteam" %}
+    <!-- add max budget we have and mines it after user choose a player  -->
+    <div v-bind="balance"  id="balance" class="w-100 btn btn-outline-danger rounded"> موجودی شما [[balance]] میلیون</div>
+    {% endif %}
+    {% if page == "home" %}
+    <!-- add max budget we have and mines it after user choose a player  -->
+    <div v-bind="balance"  id="balance" class="w-100 btn btn-danger rounded"> ارزش تیم شما {{ user_team_value }} میلیون است</div>
+    <div id="team-format-timer" class="w-100 btn btn-light rounded mt-1 mb-1">
+        مهلت تغییر ترکیب :‌ 
+        <span id="format-timer-days">00d</span>
+        <span id="format-timer-hours">00h</span>
+        <span id="format-timer-minutes"> 00m </span>
+        <span id="format-timer-seconds">00s</span>
+    </div>
+    
+    {% endif %}
+
+    {% if page == "home" %}
+    <!-- team format for large screens  -->
+    <div class="d-none d-lg-block">
+        <div class="d-flex flex-column p-2 p-md-3 p-lg-3">
+            <div class="row" style="width: 100%;height: 100%;z-index: 10;margin: 0px auto;">
+                <div class="row justify-content-center text-center m-0 p-0">
+                    <div class="col col-3 col-lg-2 col-md-3 m-1 btn btn-outline-primary"
+                        style="height: 100px; background-color: rgb(231, 231, 231);">
+                        <div class="row text-truncate mt-4">
+                            <div class="col">
+                                <div>
+                                    <h6>
+                                        امتیاز شما :
+                                    </h6>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <h4>
+                                    {% if user_score %}
+                                    {{user_score}}
+                                    {% else %}
+                                    0
+                                    {% endif %}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col col-1 col-sm-2 col-md-1 col-lg-1 m-1 btn btn-outline-primary"
+                        @click.prevent="change_team_format(4,4,2)">
+                        <img src="{% static 'home/images/format/formation-4-4-2.png' %}" style="height: 37px;"
+                            class="mt-1 mb-3">
+                        <br>
+                        <span class="">
+                            4-4-2
+                        </span>
+                    </div>
+                    <div class="col col-1 col-sm-2 col-md-1 col-lg-1 m-1 btn btn-outline-primary"
+                        @click.prevent="change_team_format(4,3,3)">
+                        <img src="{% static 'home/images/format/formation-4-3-3.png' %}" style="height: 37px;"
+                            class="mt-1 mb-3">
+                        <br>
+                        <span class="">
+                            4-3-3
+                        </span>
+                    </div>
+                    <div class="col col-1 col-sm-2 col-md-1 col-lg-1 m-1 btn btn-outline-primary"
+                        @click.prevent="change_team_format(3,4,3)">
+                        <img src="{% static 'home/images/format/formation-3-4-3.png' %}" style="height: 37px;"
+                            class="mt-1 mb-3">
+                        <br>
+                        <span class="">
+                            3-4-3
+                        </span>
+                    </div>
+                    <div class="col col-1 col-sm-2 col-md-1 col-lg-1 m-1 btn btn-outline-primary"
+                        @click.prevent="change_team_format(4,5,1)">
+                        <img src="{% static 'home/images/format/formation-4-5-1.png' %}" style="height: 37px;"
+                            class="mt-1 mb-3">
+                        <br>
+                        <span class="">
+                            4-5-1
+                        </span>
+                    </div>
+                    <div class="col col-1 col-sm-2 col-md-1 col-lg-1 m-1 btn btn-outline-primary"
+                        @click.prevent="change_team_format(5,3,2)">
+                        <img src="{% static 'home/images/format/formation-5-3-2.png' %}" style="height: 37px;"
+                            class="mt-1 mb-3">
+                        <br>
+                        <span class="">
+                            5-3-2
+                        </span>
+                    </div>
+                    <div class="col col-1 col-sm-2 col-md-1 col-lg-1 m-1 btn btn-outline-primary"
+                        @click.prevent="change_team_format(3,5,2)">
+                        <img src="{% static 'home/images/format/formation-3-5-2.png' %}" style="height: 37px;"
+                            class="mt-1 mb-3">
+                        <br>
+                        <span class="">
+                            3-5-2
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- format and team value if screen was small and medium -->
+    <div class="d-xs-block d-sm-block d-md-block d-lg-none">
+        <div class="d-flex justify-content-center btn btn-secondary" style="color: black; background-color: rgb(243, 243, 243);">
+            <div class="row align-middle text-center text-truncate">
+                <div class="col align-middle">
+                    <i class="bi bi-cash ms-0" style="font-size: larger; color: #BB2D3B;"></i>
+                </div>
+                <div class="col align-middle">
+                    <span class="">امتیاز شما : </span>
+                </div>
+                <div class="col align-middle">
+                    {% if user_score %}
+                    {{ user_score }}
+                    {% else %}
+                    0
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center w-100">
+            <div class="btn btn-group-sm w-100" role="group">
+                <button v-bind="format" id="btnGroupDrop1" type="button" class="btn btn-danger dropdown-toggle w-100"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    تغییر ترکیب تیم [[format]]
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                    <li><button type="button" @click.prevent="change_team_format(4,4,2)"
+                            class="dropdown-item">4-4-2</button></li>
+                    <li><button type="button" @click.prevent="change_team_format(4,3,3)"
+                            class="dropdown-item">4-3-3</button></li>
+                    <li><button type="button" @click.prevent="change_team_format(3,4,3)"
+                            class="dropdown-item">3-4-3</button></li>
+                    <li><button type="button" @click.prevent="change_team_format(4,5,1)"
+                            class="dropdown-item">4-5-1</button></li>
+                    <li><button type="button" @click.prevent="change_team_format(5,3,2)"
+                            class="dropdown-item">5-3-2</button></li>
+                    <li><button type="button" @click.prevent="change_team_format(3,5,2)"
+                            class="dropdown-item">3-5-2</button></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endblock %}
+
+    {% block middle_buttons %}
+    <div class="row text-center">
+        <div class="col m-0">
+            {% if page == "createteam" %}
+            {% if task == "create" %}
+            {% comment %}
+            <button class="btn btn-danger btn-random rounded-pill m-1 text-truncate disabled" @click.prevent="random_init"
+                type="button">
+                <i class="bi bi-shuffle ms-1 me-1"></i>
+                ایجاد ترکیب تصادفی
+            </button>
+            {% endcomment %}
+            
+            <button class="btn btn-danger btn-random rounded-pill m-1 text-truncate" 
+                type="button" data-bs-toggle="modal" data-bs-target="#createteam-modal">
+                <i class="bi bi-arrow-left ms-1 me-1" style="color: white; font-size: 11px;"></i>
+                <span>دخیره تیم و ادامه</span>
+            </button>
+            
+            {% elif task == "change" %}
+            <button class="btn btn-danger btn-random rounded-pill m-1 text-truncate" type="button"
+                data-bs-toggle="modal" data-bs-target="#are-you-sure-modal">
+                <i class="bi bi-save2 ms-1 me-1"></i>
+                ذخیره ترکیب و ادامه
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="are-you-sure-modal" tabindex="-1" aria-labelledby="are-you-sure-modal-Label"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header justify-content-between">
+                            <h5 class="modal-title" id="exampleModalLabel">
+                                <i class="bi bi-exclamation-octagon-fill ms-2"
+                                    style="font-size: xxx-large; color: gold;"></i>
+                                آیا مطمعن هستید؟
+                            </h5>
+                            <button type="button" class="btn-close ms-0" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" style="font-weight: bold;">
+                            کاربر گرامی لطفا در انتخاب خود دقت کنید. شما یک فقط می‌توانید {{ num_of_changes }} بازیکن
+                            خود را ویرایش کنید.
+                        </div>
+                        <div class="modal-footer justify-content-between">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بازکشت و
+                                ویرایش</button>
+                            <button type="button" class="btn btn-primary" @click.prevent="pass_selected_players">دخیره و
+                                ادامه</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {% elif page == "home" %}
+                {% if league_allowed_to_change_format %}
+                <button class="btn btn-danger rounded-pill btn-random m-1 text-truncate"
+                    @click.prevent="pass_selected_players" type="button">
+                    <i class="bi bi-check-circle ms-1 me-1"></i>
+                    <span>دخیره ترکیب</span>
+                </button>
+                {% else %}
+                <button class="btn btn-danger rounded-pill btn-random m-1 text-truncate" type="button"
+                    data-bs-toggle="modal" data-bs-target="#you-are-not-allow-to-change-format-modal">
+                    <i class="bi bi-check-circle ms-1 me-1"></i>
+                    <span>دخیره ترکیب</span>
+                </button>
+                <div class="modal fade" id="you-are-not-allow-to-change-format-modal" tabindex="-1" aria-labelledby="you-are-not-allow-to-change-format-modal-Label"
+                    aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header justify-content-between">
+                                <h5 class="modal-title" id="exampleModalLabel">
+                                    <i class="bi bi-x-octagon-fill ms-2" style="font-size: xxx-large; color: #dc3545;"></i>
+                                    شما مجاز نیستید!
+                                    </h5>
+                                <button type="button" class="btn-close ms-0" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body" style="font-weight: bold;">
+                                کاربر گرامی شما در زمان‌های خاصی مجاز به تغییر ترکیب تیم خود هستید.
+                                تاریخ بعدی تغییر ترکیب اطلاع رسانی می‌شود.
+                            </div>
+                            <div class="modal-footer justify-content-between">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @click.prevent="window.location.reload();">بستن</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endif %}
+        </div>
+        <div class="col m-0">
+
+            {% if page == "createteam" %}
+            {% if task == "create" %}
+            <button @click.prevent="clear_selected_player"
+                class="btn btn-danger rounded-pill btn-random m-1 text-truncate" type="button">
+                <i class="bi bi-arrow-counterclockwise ms-1 me-1"></i>
+                بازگشت به حالت اولیه
+            </button>
+            {% elif task == "change" %}
+            <button class="btn btn-danger rounded-pill btn-random m-1 text-truncate" type="button"
+                onclick="window.location.reload();">
+                <i class="bi bi-arrow-counterclockwise ms-1 me-1"></i>
+                بازگشت به حالت اولیه
+            </button>
+            {% endif %}
+            {% elif page == "home" %}
+            <button onclick="window.location.reload();" class="btn btn-danger rounded-pill btn-random m-1 text-truncate"
+                type="button">
+                <i class="bi bi-arrow-counterclockwise ms-1 me-1"></i>
+                ترکیب اولیه
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+
+    {% endblock %}
+
+    {% block playground %}
+    <div class="d-flex flex-column p-2 p-md-3 p-lg-3">
+        <div class="row playground-img">
+            <div class="row justify-content-center text-center m-0 p-0" v-for="(players,key) in selected_players">
+                <div v-for="(player,index) in players" class="col col-2 col-lg-2 p-0 pb-1">
+                    <div @click="playground_player_selected(key, player, index)" class="m-sm-1 m-md-2">
+                        <div v-if="player" class="d-block text-center align-middle p-0 xxcontainer"> 
+                            <img v-if="player" src="{% static 'home/images/shirts/player_shirt.png' %}"
+                                class="player-shirt-img-lg">
+                        </div>
+                        {% if page == "home" %}
+                        <!-- <br> -->
+                        <span v-if="player" class="d-none d-lg-block" 
+                            style="color: honeydew; font-size: 1vw;">
+                            [[player.player_score]]
+                        </span>
+                        <span v-if="player" class="d-xs-block d-sm-block d-md-block d-lg-none"
+                            style="color: honeydew; font-size: 2vw;">
+                            [[player.player_score]]
+                        </span>
+                        {% endif %}
+                        <img v-else src="{% static 'home/images/shirts/player_shirt_plus.png' %}"
+                            class="player-shirt-img-lg">
+                        <p v-if="player" class="d-none d-lg-block p-0 m-0 text-white text-truncate"
+                            style="font-size: 0.9vw;">
+                            {% if page != "home" %}
+                            [[ player.player_value ]]
+                            <br>
+                            {% endif %}
+                            [[player.player_name]]
+                        </p>
+                        <p v-else class="d-none d-lg-block p-0 m-0 text-truncate"
+                            style="font-size: 0.9vw; color: #6E9537;">
+                            -
+                            <br>
+                            -
+                        </p>
+                        
+                        <p v-if="player"
+                            class="d-xs-block d-sm-block d-md-block d-lg-none p-0 m-0 text-white text-truncate"
+                            style="font-size: 2.2vw;">
+                            {% if page != "home" %}
+                            [[ player.player_value ]]
+                            <br>
+                            {% endif %}
+                            [[player.player_name]]
+                        </p>
+                        <p v-else class="d-xs-block d-sm-block d-md-block d-lg-none p-0 m-0 text-truncate"
+                            style="font-size: 2vw; color: #6E9537;">
+                            -
+                            <br>
+                            -
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+
+    {% block bottom_buttons %}
+    {% if task == "create" %}
+    <!-- Modal -->
+    <div class="modal fade" id="createteam-modal" tabindex="-1" aria-labelledby="createteam-modal-Label"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header justify-content-between">
+                    <h5 class="modal-title" id="exampleModalLabel">
+                        <i class="bi bi-exclamation-triangle-fill ms-2" style="font-size: xxx-large; color: gold;"></i>
+                        انتخاب تیم
+                    </h5>
+                    <button type="button" class="btn-close ms-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="font-weight: bold;">
+                    دقت کنید بعد از ذخیره تیم خود یک بار می‌توانید ۱۵ بازیکن و یک بار ۵ بازیکن خود را ویرایش کنید. لذا در انتخاب بازیکنان خود دقت کنید.
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">بازکشت و ویرایش</button>
+                    <button type="button" class="btn btn-primary" @click.prevent="pass_selected_players">دخیره و
+                        ادامه</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% endblock %}
+
+    <!-- a block under the playground -->
+    {% block bottom %}
+    {% endblock %}
+</div>

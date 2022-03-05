@@ -1,0 +1,38 @@
+/* این فایل وظیفه تعریف و بارگذاری فونت های «فونت ایران» را برعهده دارد */
+/* پیشنهاد می شود از روش قبل استفاده کنید */
+ 
+@font-face {
+    font-family: IRANSans;
+    font-style: normal;
+    font-weight: bold;
+    src: url('IRANSans/IRANSans_Bold.ttf')  format("truetype");
+}
+@font-face {
+    font-family: IRANSans;
+    font-style: normal;
+    font-weight: 500;
+    src: url('IRANSans/IRANSans_Medium.ttf')  format("truetype");
+}
+@font-face {
+    font-family: IRANSans;
+    font-style: normal;
+    font-weight: 300;
+    src: url('IRANSans/IRANSans_Light.ttf')  format("truetype");
+}
+@font-face {
+    font-family: IRANSans;
+    font-style: normal;
+    font-weight: 200;
+    src: url('IRANSans/IRANSans_UltraLight.ttf')  format("truetype");
+}
+@font-face {
+    font-family: IRANSans;
+    font-style: normal;
+    font-weight: normal;
+    src: url('IRANSans/IRANSans.ttf')  format("truetype");
+}
+
+
+.body {
+    font-family: IRANSans;
+}

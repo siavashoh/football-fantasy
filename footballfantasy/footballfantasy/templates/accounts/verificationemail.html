@@ -1,0 +1,101 @@
+{% extends "./template.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center pt-sm-2 pt-md-4 pb-5">
+        <div class="shadow-lg col col-md-8 col-lg-5 bg-body rounded p-4 p-md-5">
+            <div class="text-center">
+                {% csrf_token %}
+                <h1><i class="bi bi-envelope-fill text-info" style="font-size: 7rem;"></i></h1>
+                <h2 class="text-center">!Wellcome</h2>
+                <p>{{ user.email }} خوش آمدید.</p>
+                <p>ایمیل شما تایید نشده است.</p>
+                <h5>لینک تایید حساب به ایمیل شما ارسال شد. لطفا به ایمیل خود مراجعه کنید و بر روی لینک تایید کلیک کنید.</h5>
+                <p class="m-1">در صورت عدم دریافت ایمیل برای ارسال مجدد کلیک کنید.</p>
+                <button type="button" class="btn btn-primary" :disabled="counting" @click.prevent="startCountdown">
+                    <span v-if="counting" >
+                        ارسال مجدد لینک [[ timer ]]</span>
+                    <span v-else>ارسال مجدد لینک</span>
+                </button>
+            </div>
+            <hr />
+            <div class=" clearfix">
+                <span>
+                    <a href="{% url 'onboard:onboard' %}" class="float-left">صفحه اصلی</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    app = new Vue({
+        el: "#app",
+        data: {
+            counting: true,
+            timer: 60
+        },
+        methods: {
+            startCountdown: function () {
+                this.timer = 60
+                this.counting = true;
+                this.sendrequest()
+                this.countdown()
+            },
+            getCookie: function (name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            },
+            sendrequest: function () {
+                const csrftoken = this.getCookie('csrftoken');
+                // create other header field named x-CSRFToken. its value is csrftoken
+                const headers = { "X-CSRFToken": csrftoken, "Content-Type": "application/json" }
+                // url
+                var _url = "/accounts/verificationemail"
+
+                // sending selected player and leaque id to django by fetched csrf and header
+                axios({
+                    method: 'post',
+                    url: _url,
+                    headers: headers,
+                }).then((res) => {
+                    console.log('email sent successfully')
+                }).catch(function (error) {
+                    var e = error.response.data["message"]
+                    if (e != "") {
+                        alert(e)
+                    }
+                });
+            },
+            onCountdownEnd: function () {
+                this.counting = false;
+            },
+            countdown: function () {
+                var cd = setInterval(() => {
+                    this.timer = this.timer - 1
+                    if (this.timer == 0) {
+                        clearInterval(cd);
+                        this.onCountdownEnd()
+                    }
+                }, 1000)
+            }
+        },
+        mounted() {
+            this.startCountdown()
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "./template.html" %}
+{% load static %}
+
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center pt-5 pb-5">
+        <div class="shadow-lg col col-md-8 col-lg-5 bg-body rounded p-4 p-md-5">
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-danger p-2" role="alert">
+                <span>
+                    زمان ساخت تیم در این لیگ به پایان رسیده و
+                    شما در این لیگ تیمی نساخته‌اید.
+                    لطفا لیگ دیگری را انتخاب کنید.
+                </span>
+            </div>
+            {% endfor %}
+            {% endif %}
+            <div class="text-center pb-3">
+                <img src="{% static 'images/fireball.png' %}" width="60%">
+            </div>
+            <div class="list-group text-center">
+                <h4>
+                    لطفا لیگ مورد نظر خود را انتخاب کنید.
+                </h4>
+                <hr>
+                {% for item in leagues %}
+                <a href="{% url 'createteam:createteam' task='create' league_id=item.id hash=hash %}"
+                    class="list-group-item list-group-item-action rounded" aria-current="true">
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <h6 class="mb-1">{{ item.league_name }}</h6>
+                        <p>{{ MEDIA_ROOT }}</p>
+                        <img src="{{ item.league_small_image.url }}" width="40" height="40">
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+{% block js %}
+{% endblock %}

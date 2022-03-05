@@ -1,0 +1,179 @@
+{% load static %}
+<style type="text/css">
+    .box-container {
+        width: 100%;
+        flex-wrap: nowrap;
+        overflow-y: hidden;
+        overflow-x: scroll;
+        /* Hide scrollbar for IE, Edge and Firefox */
+        -ms-overflow-style: none;
+        /* IE and Edge */
+        scrollbar-width: none;
+        /* Firefox */
+        font-size: smaller;
+    }
+
+    .players-div {
+        cursor: copy;
+        border: 1px solid transparent;
+    }
+
+    .players-div.disabled {
+        opacity: 0.5;
+        cursor: pointer;
+    }
+
+    .players-div:hover {
+        /* background-color: #a5a8a8; */
+        border: 1px solid #d7136e;
+    }
+
+    .swiper-btn {
+        z-index: 10;
+        width: 100%;
+    }
+
+    .swiper-btn.swiper-left-btn .bi {
+        position: absolute;
+        left: 10px;
+        top: -17px;
+    }
+
+    .swiper-btn.swiper-right-btn .bi {
+        position: absolute;
+        right: 10px;
+        top: -17px;
+    }
+
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    .box-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .bi-arrow-left:hover {
+        background: #e2e2e2;
+        border-radius: 30%;
+    }
+
+    .bi-arrow-left {
+        font-size: 50px;
+        color: rgb(66, 66, 66);
+    }
+
+    .bi-arrow-right:hover {
+        background: #e2e2e2;
+        border-radius: 30%;
+    }
+
+    .bi-arrow-right {
+        font-size: 50px;
+        color: rgb(66, 66, 66);
+    }
+
+    .arrow:hover {
+        background-color: red;
+    }
+
+    .arrow-left {
+        border: 1px solid red;
+        border-radius: 100px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .arrow-right {
+        border: 1px solid red;
+        border-radius: 100px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    .player-shirt-img-lg {
+        cursor: pointer;
+        height: 60%;
+        width: 60%;
+        margin: auto;
+    }
+
+    .xplayer-shirt-img-lg {
+        cursor: pointer;
+        height: 80%;
+        width: 80%;
+    }
+
+    .playground-img {
+        background-image: url("{% static 'home/images/playground.png' %}");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 100% 100%;
+    }
+
+    .btn-random {
+        font-size: 11px;
+        text-align: center;
+        align-items: center;
+    }
+
+    .countdown-style {
+        left: 0%;
+        color: white;
+        background-image: url("{% static 'home/images/countdown/1countdown.jpg'%}");
+        background-position: center center;
+        background-size: cover;
+    }
+
+    .aboutleague {
+        background-image: url("{% static 'home/images/aboutleague/aboutleague.jpg' %}");
+        background-size: cover;
+    }
+
+    .xcontainer {
+        position: relative;
+        text-align: center;
+        color: white;
+    }
+
+    /* Bottom left text */
+    .bottom-left {
+        position: absolute;
+        bottom: 8px;
+        left: 16px;
+    }
+
+    /* Top left text */
+    .top-left {
+        position: absolute;
+        top: 8px;
+        left: 16px;
+    }
+
+    /* Top right text */
+    .top-right {
+        position: absolute;
+        top: 8px;
+        right: 16px;
+    }
+
+    /* Bottom right text */
+    .bottom-right {
+        position: absolute;
+        bottom: 8px;
+        right: 16px;
+    }
+
+    /* Centered text */
+    .centered {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .center-bottom {
+        position: absolute;
+        top: 92%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+</style>

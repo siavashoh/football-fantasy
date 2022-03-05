@@ -1,0 +1,30 @@
+{% extends "./template.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center pt-sm-2 pt-md-4 pb-5">
+        <div class="shadow-lg col col-md-8 col-lg-5 bg-body rounded p-4 p-md-5">
+            <div class="text-center">
+                <i class="bi bi-check-square-fill text-info" style="font-size: 7rem;"></i> 
+                <p>Email Verified</p>
+                <hr />
+                <p>{{user_name}}</p>
+                <p>ایمیل شما با موفقیت تایید شد.</p>
+                <p>لطفا برای ادامه دوباره وارد شوید.</p>
+                <a href="{% url 'accounts:login' %}" class="btn btn-primary mb-3">انتقال به صفحه ورود</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    {% for message in messages %}
+        <h3> {{message}} </h3>
+    {% endfor %}
+</div>
+{% endblock %}
+
+
+{% block js %}
+<script type = "text/javascript">
+</script>
+{% endblock %}
